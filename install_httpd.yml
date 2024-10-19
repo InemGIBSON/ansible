@@ -1,0 +1,29 @@
+---
+- hosts: all  # Group of hosts defined in your inventory
+  become: yes        # Ensures the tasks are run with sudo privileges
+
+  tasks:
+    - name: Ensure HTTPD is installed
+      yum:
+        name: httpd
+        state: present
+
+    - name: Start and enable the HTTPD service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Ensure the firewall allows HTTP traffic (for CentOS/RHEL)
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure the firewall is reloaded (for CentOS/RHEL)
+      firewalld:
+        state: reloaded
+      when: ansible_os_family == "RedHat"
+
